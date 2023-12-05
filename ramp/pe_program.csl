@@ -43,13 +43,13 @@ task send_recv_task() void {
 
   const out_dsd = @get_dsd(fabout_dsd, .{
                     .fabric_color = send_color, .extent = M,
-                    .output_queue = @get_output_queue(1)
+                    .output_queue = @get_output_queue(3)
                   });
   @fmovs(out_dsd, x_dsd, .{ .async = true });
 
   const in_dsd = @get_dsd(fabin_dsd, .{
                    .fabric_color = send_color, .extent = M,
-                   .input_queue = @get_input_queue(2)
+                   .input_queue = @get_input_queue(4)
                  });
   @fmovs(y_dsd, in_dsd, .{ .async = true, .activate = exit_task_id });
 }
