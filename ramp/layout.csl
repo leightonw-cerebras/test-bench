@@ -1,0 +1,33 @@
+// data dimension on each PE
+param M: i16;
+
+// Colors
+const send_color: color = @get_color(0); // Color used to send/recv data between PEs
+const LAUNCH:     color = @get_color(8); // Color used by memcpy for kernel launch
+
+// Task IDs
+const exit_task_id: local_task_id = @get_local_task_id(9); 
+const send_recv_task_id: local_task_id = @get_local_task_id(10);
+
+// This example only uses 2 PEs
+const memcpy = @import_module("<memcpy/get_params>", .{
+  .width = 1,
+  .height = 1,
+  .LAUNCH = LAUNCH
+});
+
+layout {
+  // PE coordinates are (column, row)
+  @set_rectangle(1, 1);
+
+  @set_tile_code(0, 0, "pe_program.csl", .{ .memcpy_params = memcpy.get_params(0),
+    .send_color = send_color, .exit_task_id = exit_task_id, .send_recv_task_id = send_recv_task_id, .M = M });
+
+  @set_color_config(0, 0, send_color, .{.routes = .{ .rx = .{RAMP}, .tx = .{RAMP} }});
+
+  // export symbol names
+  @export_name("x", [*]f32, true);
+  @export_name("y", [*]f32, true);
+  @export_name("timer_buf", [*]f32, true);
+  @export_name("launch", fn()void);
+}
